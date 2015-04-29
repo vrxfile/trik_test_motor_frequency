@@ -19,12 +19,13 @@ volatile uint16_t mper = 1; // Period for motor PWM
 /// Set motor PWM frequency (Hz)
 uint8_t set_motor_pwm_freq(uint8_t motor, uint16_t freq)
 {
-	char s1[MAX_STRING_LENGTH];	// Temp string
-	if ((motor == MOTOR1) || (motor == MOTOR2) || (motor == MOTOR3) || (motor == MOTOR4))
+	char s1[MAX_STRING_LENGTH]; // Temp string
+	if ((motor == MOTOR1) || (motor == MOTOR2) || (motor == MOTOR3)
+			|| (motor == MOTOR4))
 	{
 		if (freq > 0)
 		{
-			mper = (uint16_t)(3000000 / freq);
+			mper = (uint16_t) (3000000 / freq);
 			if (mper < 1)
 				mper = 1;
 		}
@@ -43,13 +44,16 @@ uint8_t set_motor_pwm_freq(uint8_t motor, uint16_t freq)
 /// Set motor power (0...100%)
 uint8_t set_motor_power(uint8_t motor, uint8_t power)
 {
-	char s1[MAX_STRING_LENGTH];	// Temp string
-	uint16_t mdut = 0;		// Motor PWM duty
-	if ((motor == MOTOR1) || (motor == MOTOR2) || (motor == MOTOR3) || (motor == MOTOR4))
+	char s1[MAX_STRING_LENGTH]; // Temp string
+	uint16_t mdut = 0; // Motor PWM duty
+	if ((motor == MOTOR1) || (motor == MOTOR2) || (motor == MOTOR3)
+			|| (motor == MOTOR4))
 	{
 		if (power > 100)
 			power = 100;
-		mdut = uint16_t((uint32_t)(power) * (uint32_t)(mper - 1) / 100);
+		mdut = uint16_t(
+				(uint32_t) (power) * (uint32_t) (mper - 1)
+						/ 100);
 		makeWriteRegPacket(s1, motor, MMDUT, mdut);
 		sendUSBPacket(s1, s1);
 	}
@@ -61,9 +65,10 @@ uint8_t set_motor_power(uint8_t motor, uint8_t power)
 /// Start motor (with direction)
 uint8_t start_motor(uint8_t motor, uint8_t direction)
 {
-	char s1[MAX_STRING_LENGTH];	// Temp string
-	uint16_t mctl = 0;		// Motor control register
-	if ((motor == MOTOR1) || (motor == MOTOR2) || (motor == MOTOR3) || (motor == MOTOR4))
+	char s1[MAX_STRING_LENGTH]; // Temp string
+	uint16_t mctl = 0; // Motor control register
+	if ((motor == MOTOR1) || (motor == MOTOR2) || (motor == MOTOR3)
+			|| (motor == MOTOR4))
 	{
 		if (direction)
 			mctl = MOT_BACK;
@@ -79,9 +84,10 @@ uint8_t start_motor(uint8_t motor, uint8_t direction)
 /// Stop motor (with brake function)
 uint8_t stop_motor(uint8_t motor, uint8_t brake)
 {
-	char s1[MAX_STRING_LENGTH];	// Temp string
-	uint16_t mctl = 0;		// Motor control register
-	if ((motor == MOTOR1) || (motor == MOTOR2) || (motor == MOTOR3) || (motor == MOTOR4))
+	char s1[MAX_STRING_LENGTH]; // Temp string
+	uint16_t mctl = 0; // Motor control register
+	if ((motor == MOTOR1) || (motor == MOTOR2) || (motor == MOTOR3)
+			|| (motor == MOTOR4))
 	{
 		if (brake)
 			mctl = MOT_BRAKE;
@@ -97,8 +103,9 @@ uint8_t stop_motor(uint8_t motor, uint8_t brake)
 /// Set motor rotation time
 uint8_t set_motor_time(uint8_t motor, uint32_t mtime)
 {
-	char s1[MAX_STRING_LENGTH];	// Temp string
-	if ((motor == MOTOR1) || (motor == MOTOR2) || (motor == MOTOR3) || (motor == MOTOR4))
+	char s1[MAX_STRING_LENGTH]; // Temp string
+	if ((motor == MOTOR1) || (motor == MOTOR2) || (motor == MOTOR3)
+			|| (motor == MOTOR4))
 	{
 		makeWriteRegPacket(s1, motor, MMTMR, mtime);
 		sendUSBPacket(s1, s1);
@@ -111,8 +118,9 @@ uint8_t set_motor_time(uint8_t motor, uint32_t mtime)
 /// Set motor rotation angle
 uint8_t set_motor_angle(uint8_t motor, uint32_t mangle)
 {
-	char s1[MAX_STRING_LENGTH];	// Temp string
-	if ((motor == MOTOR1) || (motor == MOTOR2) || (motor == MOTOR3) || (motor == MOTOR4))
+	char s1[MAX_STRING_LENGTH]; // Temp string
+	if ((motor == MOTOR1) || (motor == MOTOR2) || (motor == MOTOR3)
+			|| (motor == MOTOR4))
 	{
 		makeWriteRegPacket(s1, motor, MMANG, mangle);
 		sendUSBPacket(s1, s1);
@@ -125,9 +133,10 @@ uint8_t set_motor_angle(uint8_t motor, uint32_t mangle)
 /// Rotate motor by time (with direction and brake)
 uint8_t rotate_motor_by_time(uint8_t motor, uint8_t direction, uint8_t brake)
 {
-	char s1[MAX_STRING_LENGTH];	// Temp string
-	uint16_t mctl = 0;		// Motor control register
-	if ((motor == MOTOR1) || (motor == MOTOR2) || (motor == MOTOR3) || (motor == MOTOR4))
+	char s1[MAX_STRING_LENGTH]; // Temp string
+	uint16_t mctl = 0; // Motor control register
+	if ((motor == MOTOR1) || (motor == MOTOR2) || (motor == MOTOR3)
+			|| (motor == MOTOR4))
 	{
 		if (direction)
 			mctl = MOT_BACK;
@@ -145,9 +154,10 @@ uint8_t rotate_motor_by_time(uint8_t motor, uint8_t direction, uint8_t brake)
 /// Rotate motor by angle (with direction and brake)
 uint8_t rotate_motor_by_angle(uint8_t motor, uint8_t direction, uint8_t brake)
 {
-	char s1[MAX_STRING_LENGTH];	// Temp string
-	uint16_t mctl = 0;		// Motor control register
-	if ((motor == MOTOR1) || (motor == MOTOR2) || (motor == MOTOR3) || (motor == MOTOR4))
+	char s1[MAX_STRING_LENGTH]; // Temp string
+	uint16_t mctl = 0; // Motor control register
+	if ((motor == MOTOR1) || (motor == MOTOR2) || (motor == MOTOR3)
+			|| (motor == MOTOR4))
 	{
 		if (direction)
 			mctl = MOT_BACK;
@@ -165,8 +175,8 @@ uint8_t rotate_motor_by_angle(uint8_t motor, uint8_t direction, uint8_t brake)
 /// Enable async timer
 uint8_t enable_async_timer(uint8_t tm_en)
 {
-	char s1[MAX_STRING_LENGTH];	// Temp string
-	uint16_t tctl = 0;		// Timer control register
+	char s1[MAX_STRING_LENGTH]; // Temp string
+	uint16_t tctl = 0; // Timer control register
 	if (tm_en)
 		tctl = AT_EN;
 	makeWriteRegPacket(s1, ASYNCTIMER, AATCTL, tctl);
@@ -175,11 +185,13 @@ uint8_t enable_async_timer(uint8_t tm_en)
 }
 
 /// Enable encoder
-uint8_t enable_encoder(uint8_t encoder, uint8_t nwires, uint8_t pullup, uint8_t edge)
+uint8_t enable_encoder(uint8_t encoder, uint8_t nwires, uint8_t pullup,
+		uint8_t edge)
 {
-	char s1[MAX_STRING_LENGTH];	// Temp string
-	uint16_t ectl = 0;		// Encoder control register
-	if ((encoder == ENCODER1) || (encoder == ENCODER2) || (encoder == ENCODER3) || (encoder == ENCODER4))
+	char s1[MAX_STRING_LENGTH]; // Temp string
+	uint16_t ectl = 0; // Encoder control register
+	if ((encoder == ENCODER1) || (encoder == ENCODER2) || (encoder
+			== ENCODER3) || (encoder == ENCODER4))
 	{
 		if (nwires)
 			ectl = ENC_2WIRES;
@@ -199,8 +211,9 @@ uint8_t enable_encoder(uint8_t encoder, uint8_t nwires, uint8_t pullup, uint8_t 
 /// Set/reset encoder value
 uint8_t set_encoder_value(uint8_t encoder, uint32_t eval)
 {
-	char s1[MAX_STRING_LENGTH];	// Temp string
-	if ((encoder == ENCODER1) || (encoder == ENCODER2) || (encoder == ENCODER3) || (encoder == ENCODER4))
+	char s1[MAX_STRING_LENGTH]; // Temp string
+	if ((encoder == ENCODER1) || (encoder == ENCODER2) || (encoder
+			== ENCODER3) || (encoder == ENCODER4))
 	{
 		makeWriteRegPacket(s1, encoder, EEVAL, eval);
 		sendUSBPacket(s1, s1);
@@ -213,22 +226,25 @@ uint8_t set_encoder_value(uint8_t encoder, uint32_t eval)
 /// Read encoder value
 uint32_t read_encoder_value(uint8_t encoder)
 {
-	char s1[MAX_STRING_LENGTH];		    // Temp string variable
-	char s2[MAX_STRING_LENGTH];		    // Temp string variable
-	uint8_t devaddr;			    // Returned device address
-	uint8_t funccode;			    // Returned function code
-	uint8_t regaddr;			    // Returned register address
-	uint32_t regval=UINT32_MAX;		    // Returned register value
-	uint16_t tmout = 0;			    // Reading timeout
-	if ((encoder == ENCODER1) || (encoder == ENCODER2) || (encoder == ENCODER3) || (encoder == ENCODER4))
+	char s1[MAX_STRING_LENGTH]; // Temp string variable
+	char s2[MAX_STRING_LENGTH]; // Temp string variable
+	uint8_t devaddr; // Returned device address
+	uint8_t funccode; // Returned function code
+	uint8_t regaddr; // Returned register address
+	uint32_t regval = UINT32_MAX; // Returned register value
+	uint16_t tmout = 0; // Reading timeout
+	if ((encoder == ENCODER1) || (encoder == ENCODER2) || (encoder
+			== ENCODER3) || (encoder == ENCODER4))
 	{
 		do
 		{
 			makeReadRegPacket(s1, encoder, EEVAL);
 			sendUSBPacket(s1, s2);
-			decodeReceivedPacket(s2, devaddr, funccode, regaddr, regval);
-			tmout ++;
-		} while (((devaddr != encoder) || (regaddr != EEVAL)) && (tmout < TIME_OUT));
+			decodeReceivedPacket(s2, devaddr, funccode, regaddr,
+					regval);
+			tmout++;
+		} while (((devaddr != encoder) || (regaddr != EEVAL)) && (tmout
+				< TIME_OUT));
 	}
 	return regval;
 }

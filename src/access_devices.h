@@ -36,16 +36,13 @@ uint8_t rotate_motor_by_angle(uint8_t motor, uint8_t direction, uint8_t brake);
 uint8_t enable_async_timer(uint8_t tm_en);
 
 /// Enable encoder
-uint8_t enable_encoder(uint8_t encoder, uint8_t nwires, uint8_t pullup, uint8_t edge);
+uint8_t enable_encoder(uint8_t encoder, uint8_t nwires, uint8_t pullup,
+		uint8_t edge);
 
 /// Set/reset encoder value
 uint8_t set_encoder_value(uint8_t encoder, uint32_t eval);
 
 /// Read encoder value
 uint32_t read_encoder_value(uint8_t encoder);
-
-
-
-
 
 #endif /* ACCESS_DEVICES_H_ */
