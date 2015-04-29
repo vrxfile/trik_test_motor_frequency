@@ -13,7 +13,7 @@
 
 using namespace std;
 
-volatile uint16_t mper = 1; // Period for motor PWM
+volatile uint16_t mper = 0xFFFF; // Period for motor PWM
 //cout << "mdut = " << mdut << endl;
 
 /// Set motor PWM frequency (Hz)
@@ -23,7 +23,7 @@ uint8_t set_motor_pwm_freq(uint8_t motor, uint16_t freq)
 	if ((motor == MOTOR1) || (motor == MOTOR2) || (motor == MOTOR3)
 			|| (motor == MOTOR4))
 	{
-		if (freq > 0)
+		if (freq > 45)
 		{
 			mper = (uint16_t) (3000000 / freq);
 			if (mper < 1)
@@ -31,8 +31,9 @@ uint8_t set_motor_pwm_freq(uint8_t motor, uint16_t freq)
 		}
 		else
 		{
-			mper = 1;
+			mper = 0xFFFF;
 		}
+		cout << "mper = " << mper << endl;
 		makeWriteRegPacket(s1, motor, MMPER, mper);
 		sendUSBPacket(s1, s1);
 	}
