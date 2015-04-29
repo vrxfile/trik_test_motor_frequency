@@ -94,68 +94,123 @@ uint8_t stop_motor(uint8_t motor, uint8_t brake)
 	return NO_ERROR;
 }
 
-
-
-/// Init motors 1 and 2
-void init_motors_12()
+/// Set motor rotation time
+uint8_t set_motor_time(uint8_t motor, uint32_t mtime)
 {
 	char s1[MAX_STRING_LENGTH];	// Temp string
-
-	makeWriteRegPacket(s1, MOTOR1, MMPER, 0x5000);
-	sendUSBPacket(s1, s1);
-	makeWriteRegPacket(s1, MOTOR1, MMDUT, 0x4000);
-	sendUSBPacket(s1, s1);
-
-	makeWriteRegPacket(s1, MOTOR2, MMPER, 0x5000);
-	sendUSBPacket(s1, s1);
-	makeWriteRegPacket(s1, MOTOR2, MMDUT, 0x4000);
-	sendUSBPacket(s1, s1);
+	if ((motor == MOTOR1) || (motor == MOTOR2) || (motor == MOTOR3) || (motor == MOTOR4))
+	{
+		makeWriteRegPacket(s1, motor, MMTMR, mtime);
+		sendUSBPacket(s1, s1);
+	}
+	else
+		return DEV_ADDR_ERROR;
+	return NO_ERROR;
 }
 
-/// Start 1 and 2 motors
-void start_motors_12()
+/// Set motor rotation angle
+uint8_t set_motor_angle(uint8_t motor, uint32_t mangle)
 {
 	char s1[MAX_STRING_LENGTH];	// Temp string
-
-	makeWriteRegPacket(s1, MOTOR1, MMCTL, MOT_ENABLE + MOT_POWER);
-	sendUSBPacket(s1, s1);
-
-	makeWriteRegPacket(s1, MOTOR2, MMCTL, MOT_ENABLE + MOT_POWER);
-	sendUSBPacket(s1, s1);
+	if ((motor == MOTOR1) || (motor == MOTOR2) || (motor == MOTOR3) || (motor == MOTOR4))
+	{
+		makeWriteRegPacket(s1, motor, MMANG, mangle);
+		sendUSBPacket(s1, s1);
+	}
+	else
+		return DEV_ADDR_ERROR;
+	return NO_ERROR;
 }
 
-/// Stop 1 and 2 motors
-void stop_motors_12()
+/// Rotate motor by time (with direction and brake)
+uint8_t rotate_motor_by_time(uint8_t motor, uint8_t direction, uint8_t brake)
 {
 	char s1[MAX_STRING_LENGTH];	// Temp string
-
-	makeWriteRegPacket(s1, MOTOR1, MMCTL, MOT_ENABLE + MOT_BRAKE);
-	sendUSBPacket(s1, s1);
-
-	makeWriteRegPacket(s1, MOTOR2, MMCTL, MOT_ENABLE + MOT_BRAKE);
-	sendUSBPacket(s1, s1);
+	uint16_t mctl = 0;		// Motor control register
+	if ((motor == MOTOR1) || (motor == MOTOR2) || (motor == MOTOR3) || (motor == MOTOR4))
+	{
+		if (direction)
+			mctl = MOT_BACK;
+		if (brake)
+			mctl = mctl + MOT_BRAKE;
+		mctl = mctl + MOT_ENABLE + MOT_POWER + MOT_AUTO;
+		makeWriteRegPacket(s1, motor, MMCTL, mctl);
+		sendUSBPacket(s1, s1);
+	}
+	else
+		return DEV_ADDR_ERROR;
+	return NO_ERROR;
 }
 
-/// Init analog sensors 1, 2 and 3
-void init_sensors_123()
+/// Rotate motor by angle (with direction and brake)
+uint8_t rotate_motor_by_angle(uint8_t motor, uint8_t direction, uint8_t brake)
 {
 	char s1[MAX_STRING_LENGTH];	// Temp string
-
-	makeWriteRegPacket(s1, SENSOR1, SSCTL, SENS_ENABLE + SENS_READ);
-	sendUSBPacket(s1, s1);
-	makeWriteRegPacket(s1, SENSOR1, SSIDX, ANALOG_INP);
-	sendUSBPacket(s1, s1);
-
-	makeWriteRegPacket(s1, SENSOR2, SSCTL, SENS_ENABLE + SENS_READ);
-	sendUSBPacket(s1, s1);
-	makeWriteRegPacket(s1, SENSOR2, SSIDX, ANALOG_INP);
-	sendUSBPacket(s1, s1);
-
-	makeWriteRegPacket(s1, SENSOR3, SSCTL, SENS_ENABLE + SENS_READ);
-	sendUSBPacket(s1, s1);
-	makeWriteRegPacket(s1, SENSOR3, SSIDX, ANALOG_INP);
-	sendUSBPacket(s1, s1);
+	uint16_t mctl = 0;		// Motor control register
+	if ((motor == MOTOR1) || (motor == MOTOR2) || (motor == MOTOR3) || (motor == MOTOR4))
+	{
+		if (direction)
+			mctl = MOT_BACK;
+		if (brake)
+			mctl = mctl + MOT_BRAKE;
+		mctl = mctl + MOT_ENABLE + MOT_POWER + MOT_AUTO + MOT_ANGLE;
+		makeWriteRegPacket(s1, motor, MMCTL, mctl);
+		sendUSBPacket(s1, s1);
+	}
+	else
+		return DEV_ADDR_ERROR;
+	return NO_ERROR;
 }
+
+/// Enable async timer
+uint8_t enable_async_timer(uint8_t tm_en)
+{
+	char s1[MAX_STRING_LENGTH];	// Temp string
+	uint16_t tctl = 0;		// Timer control register
+	if (tm_en)
+		tctl = AT_EN;
+	makeWriteRegPacket(s1, ASYNCTIMER, AATCTL, tctl);
+	sendUSBPacket(s1, s1);
+	return NO_ERROR;
+}
+
+/// Enable encoder
+uint8_t enable_encoder(uint8_t encoder, uint8_t nwires, uint8_t pullup, uint8_t edge)
+{
+	char s1[MAX_STRING_LENGTH];	// Temp string
+	uint16_t ectl = 0;		// Encoder control register
+	if ((encoder == ENCODER1) || (encoder == ENCODER2) || (encoder == ENCODER3) || (encoder == ENCODER4))
+	{
+		if (nwires)
+			ectl = ENC_2WIRES;
+		if (pullup)
+			ectl = ectl + ENC_PUPEN;
+		if (edge)
+			ectl = ectl + ENC_FALL;
+		ectl = ectl + ENC_ENABLE;
+		makeWriteRegPacket(s1, encoder, EECTL, ectl);
+		sendUSBPacket(s1, s1);
+	}
+	else
+		return DEV_ADDR_ERROR;
+	return NO_ERROR;
+}
+
+/// Set/reset encoder value
+uint8_t set_encoder_value(uint8_t encoder, uint32_t eval)
+{
+	char s1[MAX_STRING_LENGTH];	// Temp string
+	uint16_t ectl = 0;		// Encoder control register
+	if ((encoder == ENCODER1) || (encoder == ENCODER2) || (encoder == ENCODER3) || (encoder == ENCODER4))
+	{
+		makeWriteRegPacket(s1, encoder, EEVAL, eval);
+		sendUSBPacket(s1, s1);
+	}
+	else
+		return DEV_ADDR_ERROR;
+	return NO_ERROR;
+}
+
 
 /// Read data of first sensor
 uint32_t read_sensor_1()

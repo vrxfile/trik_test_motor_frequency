@@ -130,6 +130,15 @@
 #define HMC5883L_Y		0x0002
 #define HMC5883L_Z		0x0003
 
+/// Timer registers defines
+#define AATCTL			0x00
+#define AATPER			0x01
+#define AATVAL			0x02
+#define AATVER			0x03
+
+/// Timer enable mask bit
+#define AT_EN			0x0003
+
 #define MAX_STRING_LENGTH	0x20
 
 #define WRITE_FUNC		0x03

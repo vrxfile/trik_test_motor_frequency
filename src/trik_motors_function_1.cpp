@@ -29,6 +29,9 @@ int main()
 	// Open MSP430 USB device
 	connect_USBMSP();
 
+	enable_async_timer(1);
+	enable_encoder(ENCODER1, 1, 1, 1);
+	set_encoder_value(ENCODER1, 0);
 	set_motor_pwm_freq(MOTOR1, 1000);
 	set_motor_power(MOTOR1, 50);
 	start_motor(MOTOR1, 0);
@@ -39,7 +42,7 @@ int main()
 	myDelay();
 	myDelay();
 	myDelay();
-	//stop_motor(MOTOR1, 1);
+	stop_motor(MOTOR1, 1);
 
 	// Close MSP430 USB device
 	disconnect_USBMSP();
