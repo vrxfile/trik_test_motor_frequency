@@ -33,7 +33,6 @@ uint8_t set_motor_pwm_freq(uint8_t motor, uint16_t freq)
 		{
 			mper = 0xFFFF;
 		}
-		cout << "mper = " << mper << endl;
 		makeWriteRegPacket(s1, motor, MMPER, mper);
 		sendUSBPacket(s1, s1);
 	}
