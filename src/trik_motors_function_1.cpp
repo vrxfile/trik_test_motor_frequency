@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <math.h>
 
 #include "usbMSP430Defines.h"
 #include "usbMSP430Interface.h"
@@ -18,12 +19,40 @@
 
 using namespace std;
 
-// Delay approx 1 second
-void myDelay()
-{
-	for (uint32_t d = 0; d < 5000000; d++)
-		uint32_t a = d - d + d;
-}
+#define MIN_TRESHOLD	128 	// Minimum treshold for encoder value
+
+double rot0[128];		// Array of numrot elements
+double der1[128];		// First derivative of set of rotnumbers
+double der2[128];		// Second derivative of set of rotnumbers
+uint8_t num0 = 0;		// Number of elements in rot1
+uint8_t num1 = 0;		// Number of elements in der1
+uint8_t num2 = 0;		// Number of elements in der2
+double sum0 = 0;
+double sum1 = 0;
+double sum2 = 0;
+double mat0 = 0;
+double mat1 = 0;
+double mat2 = 0;
+double xmin0 = 0;
+double xmin1 = 0;
+double xmin2 = 0;
+double xmax0 = 0;
+double xmax1 = 0;
+double xmax2 = 0;
+double mid0 = 0;
+double mid1 = 0;
+double mid2 = 0;
+double ran0 = 0;
+double ran1 = 0;
+double ran2 = 0;
+double dis0 = 0;
+double dis1 = 0;
+double dis2 = 0;
+double sqo0 = 0;
+double sqo1 = 0;
+double sqo2 = 0;
+
+char stmp1[128];		// Temp string
 
 int main()
 {
@@ -44,9 +73,10 @@ int main()
 	uint32_t enc = 0;	// Encoder value
 	uint32_t oldenc = 0;	// Old encoder value
 	uint8_t timeout = 0;	// Timeout counter
-	float numrot = 0;	// Number of rotations per 1% power
-	for (uint16_t frq = 50; frq < 1000; frq += 10)
+	double numrot = 0;	// Number of rotations per 1% power
+	for (uint16_t frq = 50; frq < 1000; frq += 200)
 	{
+		num0 = 0;
 		set_motor_pwm_freq(MOTOR1, frq);
 		set_motor_pwm_freq(MOTOR1, frq);
 		for (uint8_t pwr = 2; pwr <= 100; pwr += 2)
@@ -73,17 +103,147 @@ int main()
 			// New value less than old value
 //			if ((enc < oldenc) && (timeout < 16))
 //				goto encoder_fail;
+			cout << "FRQ=" << (uint16_t)frq << " PWR=" << (uint16_t)pwr << " ENC=" << (uint32_t)enc;
+			if (enc < MIN_TRESHOLD)
+				enc = 0;
 			if (pwr != 0)
-				numrot = (float)enc / (float)pwr;
+				numrot = (double)enc / (double)pwr;
 			else
 				numrot = 0;
-			cout << "FRQ=" << (uint16_t)frq << " PWR=" << (uint16_t)pwr << " ENC=" << (uint32_t)enc << " ROT=" << numrot << endl;
+			cout << " ROT=" << numrot << endl;
+			// Numrotations array
+			if (numrot != 0)
+			{
+				rot0[num0] = numrot;
+				num0++;
+			}
 			oldenc = enc;
 			timeout = 0;
 		}
+		// Derivative 1 array
+		for (uint8_t i = 0; i < (num0 - 1); i++)
+		{
+			der1[i] = rot0[i] - rot0[i+1];
+		}
+		num1 = num0 - 1;
+		// Derivative 2 array
+		for (uint8_t i = 0; i < (num1 - 1); i++)
+		{
+			der2[i] = der1[i] - der1[i+1];
+		}
+		num2 = num1 - 1;
+		// Math expectation
+		mat0 = 0;
+		for (uint8_t i = 0; i < num0; i++)
+		{
+			mat0 = mat0 + rot0[i];
+		}
+		mat0 = mat0 / num0;
+		mat1 = 0;
+		for (uint8_t i = 0; i < num1; i++)
+		{
+			mat1 = mat1 + der1[i];
+		}
+		mat1 = mat1 / num1;
+		mat2 = 0;
+		for (uint8_t i = 0; i < num2; i++)
+		{
+			mat2 = mat2 + der2[i];
+		}
+		mat2 = mat2 / num2;
+		// Min and max
+		xmin0 = rot0[0];
+		xmax0 = rot0[0];
+		xmin1 = der1[0];
+		xmax1 = der1[0];
+		xmin2 = der2[0];
+		xmax2 = der2[0];
+		for (uint8_t i = 0; i < num0; i++)
+		{
+			if (rot0[i] < xmin0) xmin0 = rot0[i];
+			if (rot0[i] > xmax0) xmax0 = rot0[i];
+		}
+		for (uint8_t i = 0; i < num1; i++)
+		{
+			if (der1[i] < xmin1) xmin1 = der1[i];
+			if (der1[i] > xmax1) xmax1 = der1[i];
+		}
+		for (uint8_t i = 0; i < num2; i++)
+		{
+			if (der2[i] < xmin2) xmin2 = der2[i];
+			if (der2[i] > xmax2) xmax2 = der2[i];
+		}
+		// Ranges
+		ran0 = xmax0 - xmin0;
+		ran1 = xmax1 - xmin1;
+		ran2 = xmax2 - xmin2;
+		// Midranges
+		mid0 = xmin0 + (ran0 / 2);
+		mid1 = xmin1 + (ran1 / 2);
+		mid2 = xmin2 + (ran2 / 2);
+		// Dispersion (variance)
+		dis0 = 0;
+		for (uint8_t i = 0; i < num0; i++)
+		{
+			dis0 = dis0 + ((mat0 - rot0[i])*(mat0 - rot0[i]));
+		}
+		dis0 = dis0 / num0;
+		dis1 = 0;
+		for (uint8_t i = 0; i < num1; i++)
+		{
+			dis1 = dis1 + ((mat1 - der1[i])*(mat1 - der1[i]));
+		}
+		dis1 = dis1 / num1;
+		dis2 = 0;
+		for (uint8_t i = 0; i < num2; i++)
+		{
+			dis2 = dis2 + ((mat2 - der2[i])*(mat2 - der2[i]));
+		}
+		dis2 = dis2 / num2;
+		// Standard deviation
+		sqo0 = sqrt(dis0);
+		sqo1 = sqrt(dis1);
+		sqo2 = sqrt(dis2);
+
+		cout << "Numrotations array:" << endl;
+		for (uint8_t i = 0; i < num0; i++)
+			cout << rot0[i] << " ";
+		cout << endl;
+		cout << "Number of measures = " << num0 << endl;
+		cout << "Xmin = " << xmin0 << endl;
+		cout << "Xmax = " << xmax0 << endl;
+		cout << "Math. exp. (avg) = " << mat0 << endl;
+		cout << "Range = " << ran0 << endl;
+		cout << "Middle range = " << mid0 << endl;
+		cout << "Variance = " << dis0 << endl;
+		cout << "Std. deviation = " << sqo0 << endl;
+
+		cout << "Derivative 1 array:" << endl;
+		for (uint8_t i = 0; i < num1; i++)
+			cout << der1[i] << " ";
+		cout << endl;
+		cout << "Number of measures = " << num1 << endl;
+		cout << "Xmin = " << xmin1 << endl;
+		cout << "Xmax = " << xmax1 << endl;
+		cout << "Math. exp. (avg) = " << mat1 << endl;
+		cout << "Range = " << ran1 << endl;
+		cout << "Middle range = " << mid1 << endl;
+		cout << "Variance = " << dis1 << endl;
+		cout << "Std. deviation = " << sqo1 << endl;
+
+		cout << "Derivative 2 array:" << endl;
+		for (uint8_t i = 0; i < num2; i++)
+			cout << der2[i] << " ";
+		cout << endl;
+		cout << "Number of measures = " << num2 << endl;
+		cout << "Xmin = " << xmin2 << endl;
+		cout << "Xmax = " << xmax2 << endl;
+		cout << "Math. exp. (avg) = " << mat2 << endl;
+		cout << "Range = " << ran2 << endl;
+		cout << "Middle range = " << mid2 << endl;
+		cout << "Variance = " << dis2 << endl;
+		cout << "Std. deviation = " << sqo2 << endl;
 	}
-
-
 
 	// Close MSP430 USB device
 	disconnect_USBMSP();
