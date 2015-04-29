@@ -74,7 +74,7 @@ int main()
 	uint32_t oldenc = 0;	// Old encoder value
 	uint8_t timeout = 0;	// Timeout counter
 	double numrot = 0;	// Number of rotations per 1% power
-	for (uint16_t frq = 50; frq < 1000; frq += 200)
+	for (uint16_t frq = 50; frq < 1000; frq += 150)
 	{
 		num0 = 0;
 		set_motor_pwm_freq(MOTOR1, frq);
@@ -209,7 +209,7 @@ int main()
 		for (uint8_t i = 0; i < num0; i++)
 			cout << rot0[i] << " ";
 		cout << endl;
-		cout << "Number of measures = " << num0 << endl;
+		cout << "Number of measures = " << (uint16_t)num0 << endl;
 		cout << "Xmin = " << xmin0 << endl;
 		cout << "Xmax = " << xmax0 << endl;
 		cout << "Math. exp. (avg) = " << mat0 << endl;
@@ -222,7 +222,7 @@ int main()
 		for (uint8_t i = 0; i < num1; i++)
 			cout << der1[i] << " ";
 		cout << endl;
-		cout << "Number of measures = " << num1 << endl;
+		cout << "Number of measures = " << (uint16_t)num1 << endl;
 		cout << "Xmin = " << xmin1 << endl;
 		cout << "Xmax = " << xmax1 << endl;
 		cout << "Math. exp. (avg) = " << mat1 << endl;
@@ -235,7 +235,7 @@ int main()
 		for (uint8_t i = 0; i < num2; i++)
 			cout << der2[i] << " ";
 		cout << endl;
-		cout << "Number of measures = " << num2 << endl;
+		cout << "Number of measures = " << (uint16_t)num2 << endl;
 		cout << "Xmin = " << xmin2 << endl;
 		cout << "Xmax = " << xmax2 << endl;
 		cout << "Math. exp. (avg) = " << mat2 << endl;
