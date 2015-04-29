@@ -200,7 +200,6 @@ uint8_t enable_encoder(uint8_t encoder, uint8_t nwires, uint8_t pullup, uint8_t 
 uint8_t set_encoder_value(uint8_t encoder, uint32_t eval)
 {
 	char s1[MAX_STRING_LENGTH];	// Temp string
-	uint16_t ectl = 0;		// Encoder control register
 	if ((encoder == ENCODER1) || (encoder == ENCODER2) || (encoder == ENCODER3) || (encoder == ENCODER4))
 	{
 		makeWriteRegPacket(s1, encoder, EEVAL, eval);
@@ -211,69 +210,25 @@ uint8_t set_encoder_value(uint8_t encoder, uint32_t eval)
 	return NO_ERROR;
 }
 
-
-/// Read data of first sensor
-uint32_t read_sensor_1()
+/// Read encoder value
+uint32_t read_encoder_value(uint8_t encoder)
 {
 	char s1[MAX_STRING_LENGTH];		    // Temp string variable
 	char s2[MAX_STRING_LENGTH];		    // Temp string variable
-	uint32_t errcode;			    // Returned error code
 	uint8_t devaddr;			    // Returned device address
 	uint8_t funccode;			    // Returned function code
 	uint8_t regaddr;			    // Returned register address
 	uint32_t regval=UINT32_MAX;		    // Returned register value
 	uint16_t tmout = 0;			    // Reading timeout
-
-	do
+	if ((encoder == ENCODER1) || (encoder == ENCODER2) || (encoder == ENCODER3) || (encoder == ENCODER4))
 	{
-		makeReadRegPacket(s1, SENSOR1, SSVAL);
-		errcode = sendUSBPacket(s1, s2);
-		errcode = decodeReceivedPacket(s2, devaddr, funccode, regaddr, regval);
-		tmout ++;
-	} while (((devaddr != SENSOR1) || (regaddr != SSVAL)) && (tmout < TIME_OUT));
-	return regval;
-}
-
-/// Read data of second sensor
-uint32_t read_sensor_2()
-{
-	char s1[MAX_STRING_LENGTH];		    // Temp string variable
-	char s2[MAX_STRING_LENGTH];		    // Temp string variable
-	uint32_t errcode;			    // Returned error code
-	uint8_t devaddr;			    // Returned device address
-	uint8_t funccode;			    // Returned function code
-	uint8_t regaddr;			    // Returned register address
-	uint32_t regval=UINT32_MAX;		    // Returned register value
-	uint16_t tmout = 0;			    // Reading timeout
-
-	do
-	{
-		makeReadRegPacket(s1, SENSOR2, SSVAL);
-		errcode = sendUSBPacket(s1, s2);
-		errcode = decodeReceivedPacket(s2, devaddr, funccode, regaddr, regval);
-		tmout ++;
-	} while (((devaddr != SENSOR2) || (regaddr != SSVAL)) && (tmout < TIME_OUT));
-	return regval;
-}
-
-/// Read data of third sensor
-uint32_t read_sensor_3()
-{
-	char s1[MAX_STRING_LENGTH];		    // Temp string variable
-	char s2[MAX_STRING_LENGTH];		    // Temp string variable
-	uint32_t errcode;			    // Returned error code
-	uint8_t devaddr;			    // Returned device address
-	uint8_t funccode;			    // Returned function code
-	uint8_t regaddr;			    // Returned register address
-	uint32_t regval=UINT32_MAX;		    // Returned register value
-	uint16_t tmout = 0;			    // Reading timeout
-
-	do
-	{
-		makeReadRegPacket(s1, SENSOR3, SSVAL);
-		errcode = sendUSBPacket(s1, s2);
-		errcode = decodeReceivedPacket(s2, devaddr, funccode, regaddr, regval);
-		tmout ++;
-	} while (((devaddr != SENSOR3) || (regaddr != SSVAL)) && (tmout < TIME_OUT));
+		do
+		{
+			makeReadRegPacket(s1, encoder, EEVAL);
+			sendUSBPacket(s1, s2);
+			decodeReceivedPacket(s2, devaddr, funccode, regaddr, regval);
+			tmout ++;
+		} while (((devaddr != encoder) || (regaddr != EEVAL)) && (tmout < TIME_OUT));
+	}
 	return regval;
 }

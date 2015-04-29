@@ -32,17 +32,23 @@ int main()
 	enable_async_timer(1);
 	enable_encoder(ENCODER1, 1, 1, 1);
 	set_encoder_value(ENCODER1, 0);
+	cout << "encoder1 = " << read_encoder_value(ENCODER1) << endl;
 	set_motor_pwm_freq(MOTOR1, 1000);
 	set_motor_power(MOTOR1, 50);
 	start_motor(MOTOR1, 0);
 	myDelay();
 	myDelay();
 	myDelay();
+	cout << "encoder1 = " << read_encoder_value(ENCODER1) << endl;
 	start_motor(MOTOR1, 1);
 	myDelay();
 	myDelay();
 	myDelay();
+	cout << "encoder1 = " << read_encoder_value(ENCODER1) << endl;
 	stop_motor(MOTOR1, 1);
+	cout << "encoder1 = " << read_encoder_value(ENCODER1) << endl;
+	set_encoder_value(ENCODER1, 0);
+	cout << "encoder1 = " << read_encoder_value(ENCODER1) << endl;
 
 	// Close MSP430 USB device
 	disconnect_USBMSP();

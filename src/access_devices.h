@@ -41,6 +41,8 @@ uint8_t enable_encoder(uint8_t encoder, uint8_t nwires, uint8_t pullup, uint8_t 
 /// Set/reset encoder value
 uint8_t set_encoder_value(uint8_t encoder, uint32_t eval);
 
+/// Read encoder value
+uint32_t read_encoder_value(uint8_t encoder);
 
 
 
