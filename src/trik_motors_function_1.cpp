@@ -20,6 +20,7 @@
 using namespace std;
 
 #define MIN_TRESHOLD	128 	// Minimum treshold for encoder value
+#define MAX_TRESHOLD	10000 	// Maximum treshold for encoder value
 
 double rot0[128];		// Array of numrot elements
 double der1[128];		// First derivative of set of rotnumbers
@@ -27,9 +28,9 @@ double der2[128];		// Second derivative of set of rotnumbers
 uint8_t num0 = 0;		// Number of elements in rot1
 uint8_t num1 = 0;		// Number of elements in der1
 uint8_t num2 = 0;		// Number of elements in der2
-double sum0 = 0;
-double sum1 = 0;
-double sum2 = 0;
+uint16_t startpwr0 = 0;		// Minimum power value that starts motor
+
+// Statistical data
 double mat0 = 0;
 double mat1 = 0;
 double mat2 = 0;
@@ -52,6 +53,9 @@ double sqo0 = 0;
 double sqo1 = 0;
 double sqo2 = 0;
 
+FILE* repdescr;			// Report file descriptor
+#define REPFILENAME		"motor_report.txt"
+
 char stmp1[128];		// Temp string
 
 int main()
@@ -70,11 +74,17 @@ int main()
 	// Init encoder 1
 	enable_encoder(ENCODER1, 1, 1, 1);
 
+	// Make report file
+	repdescr = fopen(REPFILENAME, "w");
+	fprintf(repdescr, "Motor report file\n");
+	fprintf(repdescr, "FRQ\t\tSTDDEV0\t\tSTDDEV1\t\tSTDDEV2\t\tMINSTART\n");
+	fclose(repdescr);
+
 	uint32_t enc = 0;	// Encoder value
 	uint32_t oldenc = 0;	// Old encoder value
 	uint8_t timeout = 0;	// Timeout counter
 	double numrot = 0;	// Number of rotations per 1% power
-	for (uint16_t frq = 50; frq < 1000; frq += 150)
+	for (uint16_t frq = 50; frq < 5000; frq += 50)
 	{
 		num0 = 0;
 		set_motor_pwm_freq(MOTOR1, frq);
@@ -105,6 +115,8 @@ int main()
 //				goto encoder_fail;
 			cout << "FRQ=" << (uint16_t)frq << " PWR=" << (uint16_t)pwr << " ENC=" << (uint32_t)enc;
 			if (enc < MIN_TRESHOLD)
+				enc = 0;
+			if (enc > MAX_TRESHOLD)
 				enc = 0;
 			if (pwr != 0)
 				numrot = (double)enc / (double)pwr;
@@ -204,12 +216,15 @@ int main()
 		sqo0 = sqrt(dis0);
 		sqo1 = sqrt(dis1);
 		sqo2 = sqrt(dis2);
+		// Minimum power value
+		startpwr0 = 100 - (2 * num0) + 2;
 
 		cout << "Numrotations array:" << endl;
 		for (uint8_t i = 0; i < num0; i++)
 			cout << rot0[i] << " ";
 		cout << endl;
 		cout << "Number of measures = " << (uint16_t)num0 << endl;
+		cout << "Min. start power (%) = " << startpwr0 << endl;
 		cout << "Xmin = " << xmin0 << endl;
 		cout << "Xmax = " << xmax0 << endl;
 		cout << "Math. exp. (avg) = " << mat0 << endl;
@@ -222,7 +237,6 @@ int main()
 		for (uint8_t i = 0; i < num1; i++)
 			cout << der1[i] << " ";
 		cout << endl;
-		cout << "Number of measures = " << (uint16_t)num1 << endl;
 		cout << "Xmin = " << xmin1 << endl;
 		cout << "Xmax = " << xmax1 << endl;
 		cout << "Math. exp. (avg) = " << mat1 << endl;
@@ -235,7 +249,6 @@ int main()
 		for (uint8_t i = 0; i < num2; i++)
 			cout << der2[i] << " ";
 		cout << endl;
-		cout << "Number of measures = " << (uint16_t)num2 << endl;
 		cout << "Xmin = " << xmin2 << endl;
 		cout << "Xmax = " << xmax2 << endl;
 		cout << "Math. exp. (avg) = " << mat2 << endl;
@@ -243,6 +256,10 @@ int main()
 		cout << "Middle range = " << mid2 << endl;
 		cout << "Variance = " << dis2 << endl;
 		cout << "Std. deviation = " << sqo2 << endl;
+
+		repdescr = fopen(REPFILENAME, "a");
+		fprintf(repdescr, "%05d\t\t%5.3f\t\t%5.3f\t\t%5.3f\t\t%05d\n", frq, sqo0, sqo1, sqo2, startpwr0);
+		fclose(repdescr);
 	}
 
 	// Close MSP430 USB device
